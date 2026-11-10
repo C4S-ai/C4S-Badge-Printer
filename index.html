@@ -1,0 +1,426 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+  
+  <title>C4S Badge Printer</title>
+  
+  <style>
+    :root {
+      --bg-color: #000000;
+      --card-bg: #000000;
+      --accent-color: #00e676;
+      --accent-hover: #00c853;
+      --text-color: #ffffff;
+      --text-muted: #a0a0a0;
+      --footer-muted: #555555;
+      --brand-red: #ff3333;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      touch-action: manipulation;
+    }
+
+    body {
+      background-color: var(--bg-color);
+      color: var(--text-color);
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      padding: 20px 15px 40px 15px;
+      user-select: none;
+    }
+
+    header {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin-bottom: 20px;
+      width: 100%;
+      max-width: 480px;
+    }
+
+    .brand-logo-only {
+      width: 180px;
+      height: auto;
+      object-fit: contain;
+    }
+
+    .container {
+      background-color: var(--card-bg);
+      border: 1px solid #222222;
+      border-radius: 16px;
+      padding: 20px;
+      width: 100%;
+      max-width: 480px;
+      box-shadow: 0 8px 24px rgba(0, 0, 0, 0.8);
+      display: flex;
+      flex-direction: column;
+      gap: 16px;
+    }
+
+    .upload-box {
+      border: 2px dashed #444;
+      border-radius: 12px;
+      padding: 20px 15px;
+      text-align: center;
+      cursor: pointer;
+      transition: background 0.2s, border-color 0.2s;
+    }
+
+    .upload-box:hover {
+      border-color: var(--accent-color);
+      background-color: rgba(255, 255, 255, 0.02);
+    }
+
+    .upload-box p {
+      font-size: 1rem;
+      font-weight: 600;
+      margin-bottom: 4px;
+    }
+
+    input[type="file"] {
+      display: none;
+    }
+
+    .preview-section {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 8px;
+    }
+
+    canvas {
+      width: 100%;
+      max-width: 320px;
+      height: auto;
+      aspect-ratio: 1 / 1;
+      border-radius: 10px;
+      border: 2px solid #222;
+      background-color: #000;
+      object-fit: contain;
+      touch-action: none;
+      cursor: grab;
+    }
+
+    canvas:active {
+      cursor: grabbing;
+    }
+
+    .info-text {
+      font-size: 0.8rem;
+      color: var(--text-muted);
+      text-align: center;
+    }
+
+    .btn {
+      background-color: var(--accent-color);
+      color: #000;
+      font-weight: 700;
+      padding: 14px 20px;
+      border: none;
+      border-radius: 10px;
+      font-size: 1rem;
+      cursor: pointer;
+      width: 100%;
+      transition: background 0.2s, opacity 0.2s;
+    }
+
+    .btn:hover:not(:disabled) {
+      background-color: var(--accent-hover);
+    }
+
+    .btn:disabled {
+      opacity: 0.35;
+      cursor: not-allowed;
+    }
+
+    footer {
+      margin-top: 30px;
+      text-align: center;
+      font-size: 0.75rem;
+      color: var(--footer-muted);
+      letter-spacing: 0.5px;
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+      align-items: center;
+    }
+
+    footer a.brand-link {
+      color: var(--brand-red);
+      font-weight: 600;
+      text-decoration: none;
+      transition: opacity 0.2s;
+    }
+
+    footer a.brand-link:hover {
+      opacity: 0.8;
+      text-decoration: underline;
+    }
+
+    .help-btn {
+      margin-top: 16px;
+      background-color: transparent;
+      color: var(--text-muted);
+      border: 1px solid #333333;
+      padding: 8px 24px;
+      border-radius: 20px;
+      font-size: 0.8rem;
+      font-weight: 600;
+      cursor: pointer;
+      text-decoration: none;
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      transition: background-color 0.2s, border-color 0.2s, color 0.2s;
+    }
+
+    .help-btn:hover {
+      background-color: #111111;
+      border-color: var(--brand-red);
+      color: #ffffff;
+    }
+  </style>
+</head>
+<body>
+
+  <header>
+    <img class="brand-logo-only" src="logo.png" alt="C4S Badge Printer">
+  </header>
+
+  <main class="container">
+    <div class="upload-box" onclick="document.getElementById('image-input').click()">
+      <p>📸 Tap to select a photo</p>
+      <span class="info-text">Target: 57mm Badge (300 DPI)</span>
+      <input type="file" id="image-input" accept="image/*">
+    </div>
+
+    <div class="preview-section">
+      <p class="info-text">Drag photo to move • Pinch to zoom</p>
+      <canvas id="print-canvas"></canvas>
+    </div>
+
+    <button id="download-btn" class="btn" disabled>Download Ready-to-Print Badge</button>
+  </main>
+
+  <footer>
+    <p>© 2026 <a class="brand-link" href="https://wa.me/96560908108?text=Hello%2C%20I%20would%20like%20assistance%20with%20the%20C4S%20Badge%20Printer%20app." target="_blank">C4S.ai</a>. All Rights Reserved.</p>
+    <p>Licensed for 57mm Magnetic Badge Production Studio</p>
+
+    <a class="help-btn" href="https://wa.me/96560908108?text=Hello%2C%20I%20would%20like%20assistance%20with%20the%20C4S%20Badge%20Printer%20app." target="_blank">
+      💬 HELP
+    </a>
+  </footer>
+
+  <script>
+    const DISPLAY_SIZE = 673; 
+    const circleRadius = DISPLAY_SIZE * 0.42; 
+    const circleDiameter = circleRadius * 2;   
+    const OUTPUT_SIZE = Math.round(circleDiameter); 
+
+    const imageInput = document.getElementById('image-input');
+    const canvas = document.getElementById('print-canvas');
+    const ctx = canvas.getContext('2d');
+    const downloadBtn = document.getElementById('download-btn');
+
+    canvas.width = DISPLAY_SIZE;
+    canvas.height = DISPLAY_SIZE;
+
+    let loadedImage = null;
+
+    let scale = 1;
+    let minScale = 1;
+    let maxScale = 4;
+    let panX = 0;
+    let panY = 0;
+
+    let isDragging = false;
+    let startX = 0, startY = 0;
+    let initialPinchDistance = null;
+    let initialScale = 1;
+
+    imageInput.addEventListener('change', (e) => {
+      const file = e.target.files[0];
+      if (!file) return;
+
+      const reader = new FileReader();
+      reader.onload = (event) => {
+        const img = new Image();
+        img.onload = () => {
+          loadedImage = img;
+          
+          minScale = Math.max(circleDiameter / img.width, circleDiameter / img.height);
+          
+          scale = minScale; 
+          panX = 0;
+          panY = 0;
+
+          redraw(true);
+          downloadBtn.disabled = false;
+        };
+        img.src = event.target.result;
+      };
+      reader.readAsDataURL(file);
+    });
+
+    function redraw(showOverlay) {
+      if (!loadedImage) return;
+
+      ctx.clearRect(0, 0, DISPLAY_SIZE, DISPLAY_SIZE);
+
+      scale = Math.max(minScale, Math.min(scale, minScale * maxScale));
+
+      const imgW = loadedImage.width * scale;
+      const imgH = loadedImage.height * scale;
+
+      const maxPanX = Math.max(0, (imgW - circleDiameter) / 2);
+      const maxPanY = Math.max(0, (imgH - circleDiameter) / 2);
+
+      panX = Math.max(-maxPanX, Math.min(maxPanX, panX));
+      panY = Math.max(-maxPanY, Math.min(maxPanY, panY));
+
+      const x = (DISPLAY_SIZE / 2) - (imgW / 2) + panX;
+      const y = (DISPLAY_SIZE / 2) - (imgH / 2) + panY;
+
+      ctx.drawImage(loadedImage, x, y, imgW, imgH);
+
+      if (showOverlay) {
+        const centerX = DISPLAY_SIZE / 2;
+        const centerY = DISPLAY_SIZE / 2;
+
+        ctx.save();
+        ctx.fillStyle = 'rgba(0, 0, 0, 0.6)';
+        ctx.beginPath();
+        ctx.rect(0, 0, DISPLAY_SIZE, DISPLAY_SIZE);
+        ctx.arc(centerX, centerY, circleRadius, 0, Math.PI * 2, true);
+        ctx.fill();
+        ctx.restore();
+
+        ctx.save();
+        ctx.strokeStyle = '#00e676';
+        ctx.lineWidth = 4;
+        ctx.setLineDash([12, 8]);
+        ctx.beginPath();
+        ctx.arc(centerX, centerY, circleRadius, 0, Math.PI * 2);
+        ctx.stroke();
+        ctx.restore();
+      }
+    }
+
+    canvas.addEventListener('touchstart', (e) => {
+      if (!loadedImage) return;
+
+      if (e.touches.length === 1) {
+        isDragging = true;
+        startX = e.touches[0].clientX - panX;
+        startY = e.touches[0].clientY - panY;
+      } else if (e.touches.length === 2) {
+        isDragging = false;
+        initialPinchDistance = getTouchDistance(e.touches);
+        initialScale = scale;
+      }
+    });
+
+    canvas.addEventListener('touchmove', (e) => {
+      if (!loadedImage) return;
+
+      if (e.touches.length === 1 && isDragging) {
+        panX = e.touches[0].clientX - startX;
+        panY = e.touches[0].clientY - startY;
+        redraw(true);
+      } else if (e.touches.length === 2 && initialPinchDistance) {
+        const currentDistance = getTouchDistance(e.touches);
+        const pinchRatio = currentDistance / initialPinchDistance;
+        scale = initialScale * pinchRatio;
+        redraw(true);
+      }
+    });
+
+    canvas.addEventListener('touchend', (e) => {
+      if (e.touches.length < 2) initialPinchDistance = null;
+      if (e.touches.length === 0) isDragging = false;
+    });
+
+    canvas.addEventListener('mousedown', (e) => {
+      if (!loadedImage) return;
+      isDragging = true;
+      startX = e.clientX - panX;
+      startY = e.clientY - panY;
+    });
+
+    window.addEventListener('mousemove', (e) => {
+      if (isDragging && loadedImage) {
+        panX = e.clientX - startX;
+        panY = e.clientY - startY;
+        redraw(true);
+      }
+    });
+
+    window.addEventListener('mouseup', () => { isDragging = false; });
+
+    canvas.addEventListener('wheel', (e) => {
+      if (!loadedImage) return;
+      e.preventDefault();
+      const zoomFactor = e.deltaY < 0 ? 1.08 : 0.92;
+      scale *= zoomFactor;
+      redraw(true);
+    }, { passive: false });
+
+    function getTouchDistance(touches) {
+      const dx = touches[0].clientX - touches[1].clientX;
+      const dy = touches[0].clientY - touches[1].clientY;
+      return Math.sqrt(dx * dx + dy * dy);
+    }
+
+    downloadBtn.addEventListener('click', () => {
+      if (!loadedImage) return;
+
+      redraw(false);
+
+      const exportCanvas = document.createElement('canvas');
+      exportCanvas.width = OUTPUT_SIZE;
+      exportCanvas.height = OUTPUT_SIZE;
+      const eCtx = exportCanvas.getContext('2d');
+
+      const imgW = loadedImage.width * scale;
+      const imgH = loadedImage.height * scale;
+
+      const centerX = DISPLAY_SIZE / 2;
+      const centerY = DISPLAY_SIZE / 2;
+      const cropLeft = centerX - circleRadius;
+      const cropTop = centerY - circleRadius;
+
+      const imgScreenX = (DISPLAY_SIZE / 2) - (imgW / 2) + panX;
+      const imgScreenY = (DISPLAY_SIZE / 2) - (imgH / 2) + panY;
+
+      const drawX = imgScreenX - cropLeft;
+      const drawY = imgScreenY - cropTop;
+
+      const exportScale = OUTPUT_SIZE / circleDiameter;
+
+      eCtx.drawImage(
+        loadedImage, 
+        drawX * exportScale, 
+        drawY * exportScale, 
+        imgW * exportScale, 
+        imgH * exportScale
+      );
+
+      const dataUrl = exportCanvas.toDataURL('image/png', 1.0);
+      redraw(true);
+
+      const link = document.createElement('a');
+      link.download = `C4S_badge_exact_crop_300dpi.png`;
+      link.href = dataUrl;
+      link.click();
+    });
+  </script>
+</body>
+</html>
