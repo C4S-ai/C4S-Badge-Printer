@@ -1,427 +1,334 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <link rel="manifest" href="manifest.json">
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
-  
-  <title>C4S Badge Printer</title>
-  
-  <style>
-    :root {
-      --bg-color: #000000;
-      --card-bg: #000000;
-      --accent-color: #00e676;
-      --accent-hover: #00c853;
-      --text-color: #ffffff;
-      --text-muted: #a0a0a0;
-      --footer-muted: #555555;
-      --brand-red: #ff3333;
-    }
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+    <meta name="mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <title>C4S Badge Printer</title>
+    <link rel="manifest" href="manifest.json">
+    <link rel="icon" type="image/png" href="Logo.png">
+    
+    <style>
+        :root {
+            --bg-color: #000000;
+            --card-bg: #000000;
+            --accent-color: #00e676;
+            --accent-hover: #00c853;
+            --text-color: #ffffff;
+            --text-muted: #a0a0a0;
+            --border-muted: #555555;
+            --brand-red: #ff3333;
+        }
 
-    * {
-      box-sizing: border-box;
-      margin: 0;
-      padding: 0;
-      font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-      touch-action: manipulation;
-    }
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            touch-action: manipulation;
+        }
 
-    body {
-      background-color: var(--bg-color);
-      color: var(--text-color);
-      min-height: 100vh;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      padding: 20px 15px 40px 15px;
-      user-select: none;
-    }
+        body {
+            background-color: var(--bg-color);
+            color: var(--text-color);
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+            align-items: center;
+            padding: 20px 15px;
+        }
 
-    header {
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      margin-bottom: 20px;
-      width: 100%;
-      max-width: 480px;
-    }
+        header {
+            text-align: center;
+            margin-bottom: 10px;
+        }
 
-    .brand-logo-only {
-      width: 180px;
-      height: auto;
-      object-fit: contain;
-    }
+        .brand-logo-only {
+            max-width: 180px;
+            height: auto;
+            display: block;
+            margin: 0 auto 5px auto;
+        }
 
-    .container {
-      background-color: var(--card-bg);
-      border: 1px solid #222222;
-      border-radius: 16px;
-      padding: 20px;
-      width: 100%;
-      max-width: 480px;
-      box-shadow: 0 8px 24px rgba(0, 0, 0, 0.8);
-      display: flex;
-      flex-direction: column;
-      gap: 16px;
-    }
+        .container {
+            width: 100%;
+            max-width: 480px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 15px;
+        }
 
-    .upload-box {
-      border: 2px dashed #444;
-      border-radius: 12px;
-      padding: 20px 15px;
-      text-align: center;
-      cursor: pointer;
-      transition: background 0.2s, border-color 0.2s;
-    }
+        .upload-zone {
+            width: 100%;
+            border: 2px dashed var(--border-muted);
+            border-radius: 12px;
+            padding: 12px;
+            text-align: center;
+            cursor: pointer;
+            background-color: var(--card-bg);
+            transition: border-color 0.2s;
+        }
 
-    .upload-box:hover {
-      border-color: var(--accent-color);
-      background-color: rgba(255, 255, 255, 0.02);
-    }
+        .upload-zone:hover {
+            border-color: var(--accent-color);
+        }
 
-    .upload-box p {
-      font-size: 1rem;
-      font-weight: 600;
-      margin-bottom: 4px;
-    }
+        .crop-viewport {
+            width: 280px;
+            height: 280px;
+            border: 2px solid var(--border-muted);
+            border-radius: 12px;
+            position: relative;
+            overflow: hidden;
+            background-color: #050505;
+            touch-action: none;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
 
-    input[type="file"] {
-      display: none;
-    }
+        .crop-viewport.active {
+            border-color: var(--accent-color);
+        }
 
-    .preview-section {
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      gap: 8px;
-    }
+        #image-to-crop {
+            position: absolute;
+            transform-origin: center center;
+            cursor: grab;
+            user-select: none;
+            -webkit-user-drag: none;
+        }
 
-    canvas {
-      width: 100%;
-      max-width: 320px;
-      height: auto;
-      aspect-ratio: 1 / 1;
-      border-radius: 10px;
-      border: 2px solid #222;
-      background-color: #000;
-      object-fit: contain;
-      touch-action: none;
-      cursor: grab;
-    }
+        .btn-download {
+            width: 100%;
+            padding: 14px;
+            background-color: var(--accent-color);
+            color: #000000;
+            font-weight: 700;
+            font-size: 1rem;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: opacity 0.2s, background-color 0.2s;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 8px;
+        }
 
-    canvas:active {
-      cursor: grabbing;
-    }
+        .btn-download:disabled {
+            opacity: 0.3;
+            cursor: not-allowed;
+            background-color: #333333;
+            color: #888888;
+        }
 
-    .info-text {
-      font-size: 0.8rem;
-      color: var(--text-muted);
-      text-align: center;
-    }
+        .btn-download:not(:disabled):hover {
+            background-color: var(--accent-hover);
+        }
 
-    .btn {
-      background-color: var(--accent-color);
-      color: #000;
-      font-weight: 700;
-      padding: 14px 20px;
-      border: none;
-      border-radius: 10px;
-      font-size: 1rem;
-      cursor: pointer;
-      width: 100%;
-      transition: background 0.2s, opacity 0.2s;
-    }
+        footer {
+            margin-top: 20px;
+            text-align: center;
+            font-size: 0.8rem;
+            color: var(--text-muted);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 8px;
+        }
 
-    .btn:hover:not(:disabled) {
-      background-color: var(--accent-hover);
-    }
+        footer span.brand-text {
+            color: var(--brand-red);
+            font-weight: 600;
+        }
 
-    .btn:disabled {
-      opacity: 0.35;
-      cursor: not-allowed;
-    }
+        .help-link {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            color: var(--text-muted);
+            text-decoration: none;
+            font-size: 0.8rem;
+            padding: 6px 12px;
+            border: 1px solid #333;
+            border-radius: 20px;
+            background-color: rgba(255, 255, 255, 0.05);
+        }
 
-    footer {
-      margin-top: 30px;
-      text-align: center;
-      font-size: 0.75rem;
-      color: var(--footer-muted);
-      letter-spacing: 0.5px;
-      display: flex;
-      flex-direction: column;
-      gap: 4px;
-      align-items: center;
-    }
+        .help-link:hover {
+            border-color: var(--accent-color);
+            color: var(--text-color);
+        }
 
-    footer a.brand-link {
-      color: var(--brand-red);
-      font-weight: 600;
-      text-decoration: none;
-      transition: opacity 0.2s;
-    }
-
-    footer a.brand-link:hover {
-      opacity: 0.8;
-      text-decoration: underline;
-    }
-
-    .help-btn {
-      margin-top: 16px;
-      background-color: transparent;
-      color: var(--text-muted);
-      border: 1px solid #333333;
-      padding: 8px 24px;
-      border-radius: 20px;
-      font-size: 0.8rem;
-      font-weight: 600;
-      cursor: pointer;
-      text-decoration: none;
-      display: inline-flex;
-      align-items: center;
-      gap: 6px;
-      transition: background-color 0.2s, border-color 0.2s, color 0.2s;
-    }
-
-    .help-btn:hover {
-      background-color: #111111;
-      border-color: var(--brand-red);
-      color: #ffffff;
-    }
-  </style>
+        canvas {
+            display: none;
+        }
+    </style>
 </head>
 <body>
 
-  <header>
-    <img class="brand-logo-only" src="Logo.png" alt="C4S Badge Printer">
-  </header>
+    <header>
+        <img class="brand-logo-only" src="Logo.png" alt="C4S Badge Printer">
+    </header>
 
-  <main class="container">
-    <div class="upload-box" onclick="document.getElementById('image-input').click()">
-      <p>📸 Tap to select a photo</p>
-      <span class="info-text">Target: 57mm Badge (300 DPI)</span>
-      <input type="file" id="image-input" accept="image/*">
-    </div>
+    <main class="container">
+        <div class="upload-zone" id="upload-zone" onclick="document.getElementById('file-input').click()">
+            <p>📷 <strong>Tap to select a photo</strong></p>
+            <p style="font-size: 0.8rem; color: var(--text-muted); margin-top: 4px;">Target: 57mm Badge (300 DPI)</p>
+            <input type="file" id="file-input" accept="image/*" style="display: none;">
+        </div>
 
-    <div class="preview-section">
-      <p class="info-text">Drag photo to move • Pinch to zoom</p>
-      <canvas id="print-canvas"></canvas>
-    </div>
+        <p style="font-size: 0.75rem; color: var(--text-muted);">Drag photo to move • Pinch to zoom</p>
 
-    <button id="download-btn" class="btn" disabled>Download Ready-to-Print Badge</button>
-  </main>
+        <div class="crop-viewport" id="viewport">
+            <img id="image-to-crop" style="display: none;">
+        </div>
 
-  <footer>
-    <p>© 2026 <a class="brand-link" href="https://wa.me/96560908108?text=Hello%2C%20I%20would%20like%20assistance%20with%20the%20C4S%20Badge%20Printer%20app." target="_blank">C4S.ai</a>. All Rights Reserved.</p>
-    <p>Licensed for Amy's World</p>
+        <button class="btn-download" id="btn-download" disabled>
+            Download Ready-to-Print Badge
+        </button>
+    </main>
 
-    <a class="help-btn" href="https://wa.me/96560908108?text=Hello%2C%20I%20would%20like%20assistance%20with%20the%20C4S%20Badge%20Printer%20app." target="_blank">
-      💬 HELP
-    </a>
-  </footer>
+    <footer>
+        <p>© 2026 <span class="brand-text">C4S.ai</span>. All Rights Reserved.</p>
+        <p style="font-size: 0.7rem;">Licensed for Amy's World</p>
+        <a href="https://wa.me/96560908108" target="_blank" class="help-link">
+            💬 HELP
+        </a>
+    </footer>
 
-  <script>
-    const DISPLAY_SIZE = 673; 
-    const circleRadius = DISPLAY_SIZE * 0.42; 
-    const circleDiameter = circleRadius * 2;   
-    const OUTPUT_SIZE = Math.round(circleDiameter); 
+    <canvas id="export-canvas" width="673" height="673"></canvas>
 
-    const imageInput = document.getElementById('image-input');
-    const canvas = document.getElementById('print-canvas');
-    const ctx = canvas.getContext('2d');
-    const downloadBtn = document.getElementById('download-btn');
+    <script>
+        const fileInput = document.getElementById('file-input');
+        const img = document.getElementById('image-to-crop');
+        const viewport = document.getElementById('viewport');
+        const btnDownload = document.getElementById('btn-download');
+        const canvas = document.getElementById('export-canvas');
+        const ctx = canvas.getContext('2d');
 
-    canvas.width = DISPLAY_SIZE;
-    canvas.height = DISPLAY_SIZE;
+        let scale = 1;
+        let posX = 0;
+        let posY = 0;
+        let isDragging = false;
+        let startX, startY;
+        let initialDistance = 0;
 
-    let loadedImage = null;
+        fileInput.addEventListener('change', (e) => {
+            const file = e.target.files[0];
+            if (file) {
+                const reader = new FileReader();
+                reader.onload = (event) => {
+                    img.src = event.target.result;
+                    img.style.display = 'block';
+                    viewport.classList.add('active');
+                    btnDownload.disabled = false;
+                    
+                    img.onload = () => {
+                        const vpWidth = viewport.clientWidth;
+                        const vpHeight = viewport.clientHeight;
+                        const scaleW = vpWidth / img.naturalWidth;
+                        const scaleH = vpHeight / img.naturalHeight;
+                        scale = Math.max(scaleW, scaleH);
+                        posX = (vpWidth - img.naturalWidth * scale) / 2;
+                        posY = (vpHeight - img.naturalHeight * scale) / 2;
+                        updateTransform();
+                    };
+                };
+                reader.readAsDataURL(file);
+            }
+        });
 
-    let scale = 1;
-    let minScale = 1;
-    let maxScale = 4;
-    let panX = 0;
-    let panY = 0;
+        function updateTransform() {
+            img.style.transform = `translate(${posX}px, ${posY}px) scale(${scale})`;
+        }
 
-    let isDragging = false;
-    let startX = 0, startY = 0;
-    let initialPinchDistance = null;
-    let initialScale = 1;
+        // Pointer Events for Mouse & Touch Pan/Zoom
+        viewport.addEventListener('pointerdown', (e) => {
+            if (!img.src) return;
+            isDragging = true;
+            startX = e.clientX - posX;
+            startY = e.clientY - posY;
+            viewport.setPointerCapture(e.pointerId);
+        });
 
-    imageInput.addEventListener('change', (e) => {
-      const file = e.target.files[0];
-      if (!file) return;
+        viewport.addEventListener('pointermove', (e) => {
+            if (!isDragging) return;
+            posX = e.clientX - startX;
+            posY = e.clientY - startY;
+            updateTransform();
+        });
 
-      const reader = new FileReader();
-      reader.onload = (event) => {
-        const img = new Image();
-        img.onload = () => {
-          loadedImage = img;
-          
-          minScale = Math.max(circleDiameter / img.width, circleDiameter / img.height);
-          
-          scale = minScale; 
-          panX = 0;
-          panY = 0;
+        viewport.addEventListener('pointerup', (e) => {
+            isDragging = false;
+            try { viewport.releasePointerCapture(e.pointerId); } catch(err) {}
+        });
 
-          redraw(true);
-          downloadBtn.disabled = false;
-        };
-        img.src = event.target.result;
-      };
-      reader.readAsDataURL(file);
-    });
+        // Touch Pinch-to-Zoom
+        viewport.addEventListener('touchstart', (e) => {
+            if (e.touches.length === 2) {
+                initialDistance = Math.hypot(
+                    e.touches[0].clientX - e.touches[1].clientX,
+                    e.touches[0].clientY - e.touches[1].clientY
+                );
+            }
+        });
 
-    function redraw(showOverlay) {
-      if (!loadedImage) return;
+        viewport.addEventListener('touchmove', (e) => {
+            if (e.touches.length === 2 && initialDistance > 0) {
+                const newDistance = Math.hypot(
+                    e.touches[0].clientX - e.touches[1].clientX,
+                    e.touches[0].clientY - e.touches[1].clientY
+                );
+                const zoomFactor = newDistance / initialDistance;
+                scale *= zoomFactor;
+                initialDistance = newDistance;
+                updateTransform();
+            }
+        });
 
-      ctx.clearRect(0, 0, DISPLAY_SIZE, DISPLAY_SIZE);
+        // Mouse Wheel Zoom
+        viewport.addEventListener('wheel', (e) => {
+            if (!img.src) return;
+            e.preventDefault();
+            const zoomSpeed = 0.05;
+            if (e.deltaY < 0) {
+                scale *= (1 + zoomSpeed);
+            } else {
+                scale *= (1 - zoomSpeed);
+            }
+            updateTransform();
+        }, { passive: false });
 
-      scale = Math.max(minScale, Math.min(scale, minScale * maxScale));
+        // Generate 300 DPI 57mm Image Output (673x673 px)
+        btnDownload.addEventListener('click', () => {
+            if (!img.src) return;
+            
+            const targetSize = 673; // 57mm at 300 DPI
+            const vpSize = viewport.clientWidth;
+            const ratio = targetSize / vpSize;
 
-      const imgW = loadedImage.width * scale;
-      const imgH = loadedImage.height * scale;
+            ctx.clearRect(0, 0, targetSize, targetSize);
+            ctx.fillStyle = "#000000";
+            ctx.fillRect(0, 0, targetSize, targetSize);
 
-      const maxPanX = Math.max(0, (imgW - circleDiameter) / 2);
-      const maxPanY = Math.max(0, (imgH - circleDiameter) / 2);
+            const drawX = posX * ratio;
+            const drawY = posY * ratio;
+            const drawW = img.naturalWidth * scale * ratio;
+            const drawH = img.naturalHeight * scale * ratio;
 
-      panX = Math.max(-maxPanX, Math.min(maxPanX, panX));
-      panY = Math.max(-maxPanY, Math.min(maxPanY, panY));
+            ctx.drawImage(img, drawX, drawY, drawW, drawH);
 
-      const x = (DISPLAY_SIZE / 2) - (imgW / 2) + panX;
-      const y = (DISPLAY_SIZE / 2) - (imgH / 2) + panY;
-
-      ctx.drawImage(loadedImage, x, y, imgW, imgH);
-
-      if (showOverlay) {
-        const centerX = DISPLAY_SIZE / 2;
-        const centerY = DISPLAY_SIZE / 2;
-
-        ctx.save();
-        ctx.fillStyle = 'rgba(0, 0, 0, 0.6)';
-        ctx.beginPath();
-        ctx.rect(0, 0, DISPLAY_SIZE, DISPLAY_SIZE);
-        ctx.arc(centerX, centerY, circleRadius, 0, Math.PI * 2, true);
-        ctx.fill();
-        ctx.restore();
-
-        ctx.save();
-        ctx.strokeStyle = '#00e676';
-        ctx.lineWidth = 4;
-        ctx.setLineDash([12, 8]);
-        ctx.beginPath();
-        ctx.arc(centerX, centerY, circleRadius, 0, Math.PI * 2);
-        ctx.stroke();
-        ctx.restore();
-      }
-    }
-
-    canvas.addEventListener('touchstart', (e) => {
-      if (!loadedImage) return;
-
-      if (e.touches.length === 1) {
-        isDragging = true;
-        startX = e.touches[0].clientX - panX;
-        startY = e.touches[0].clientY - panY;
-      } else if (e.touches.length === 2) {
-        isDragging = false;
-        initialPinchDistance = getTouchDistance(e.touches);
-        initialScale = scale;
-      }
-    });
-
-    canvas.addEventListener('touchmove', (e) => {
-      if (!loadedImage) return;
-
-      if (e.touches.length === 1 && isDragging) {
-        panX = e.touches[0].clientX - startX;
-        panY = e.touches[0].clientY - startY;
-        redraw(true);
-      } else if (e.touches.length === 2 && initialPinchDistance) {
-        const currentDistance = getTouchDistance(e.touches);
-        const pinchRatio = currentDistance / initialPinchDistance;
-        scale = initialScale * pinchRatio;
-        redraw(true);
-      }
-    });
-
-    canvas.addEventListener('touchend', (e) => {
-      if (e.touches.length < 2) initialPinchDistance = null;
-      if (e.touches.length === 0) isDragging = false;
-    });
-
-    canvas.addEventListener('mousedown', (e) => {
-      if (!loadedImage) return;
-      isDragging = true;
-      startX = e.clientX - panX;
-      startY = e.clientY - panY;
-    });
-
-    window.addEventListener('mousemove', (e) => {
-      if (isDragging && loadedImage) {
-        panX = e.clientX - startX;
-        panY = e.clientY - startY;
-        redraw(true);
-      }
-    });
-
-    window.addEventListener('mouseup', () => { isDragging = false; });
-
-    canvas.addEventListener('wheel', (e) => {
-      if (!loadedImage) return;
-      e.preventDefault();
-      const zoomFactor = e.deltaY < 0 ? 1.08 : 0.92;
-      scale *= zoomFactor;
-      redraw(true);
-    }, { passive: false });
-
-    function getTouchDistance(touches) {
-      const dx = touches[0].clientX - touches[1].clientX;
-      const dy = touches[0].clientY - touches[1].clientY;
-      return Math.sqrt(dx * dx + dy * dy);
-    }
-
-    downloadBtn.addEventListener('click', () => {
-      if (!loadedImage) return;
-
-      redraw(false);
-
-      const exportCanvas = document.createElement('canvas');
-      exportCanvas.width = OUTPUT_SIZE;
-      exportCanvas.height = OUTPUT_SIZE;
-      const eCtx = exportCanvas.getContext('2d');
-
-      const imgW = loadedImage.width * scale;
-      const imgH = loadedImage.height * scale;
-
-      const centerX = DISPLAY_SIZE / 2;
-      const centerY = DISPLAY_SIZE / 2;
-      const cropLeft = centerX - circleRadius;
-      const cropTop = centerY - circleRadius;
-
-      const imgScreenX = (DISPLAY_SIZE / 2) - (imgW / 2) + panX;
-      const imgScreenY = (DISPLAY_SIZE / 2) - (imgH / 2) + panY;
-
-      const drawX = imgScreenX - cropLeft;
-      const drawY = imgScreenY - cropTop;
-
-      const exportScale = OUTPUT_SIZE / circleDiameter;
-
-      eCtx.drawImage(
-        loadedImage, 
-        drawX * exportScale, 
-        drawY * exportScale, 
-        imgW * exportScale, 
-        imgH * exportScale
-      );
-
-      const dataUrl = exportCanvas.toDataURL('image/png', 1.0);
-      redraw(true);
-
-      const link = document.createElement('a');
-      link.download = `C4S_badge_exact_crop_300dpi.png`;
-      link.href = dataUrl;
-      link.click();
-    });
-  </script>
+            const link = document.createElement('a');
+            link.download = `C4S-Badge-57mm-${Date.now()}.png`;
+            link.href = canvas.toDataURL('image/png', 1.0);
+            link.click();
+        });
+    </script>
 </body>
 </html>
