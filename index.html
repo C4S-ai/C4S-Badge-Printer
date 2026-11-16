@@ -84,7 +84,7 @@
             border-radius: 12px;
             position: relative;
             overflow: hidden;
-            background-color: #050505;
+            background-color: #ffffff;
             touch-action: none;
             display: flex;
             justify-content: center;
@@ -97,10 +97,26 @@
 
         #image-to-crop {
             position: absolute;
+            top: 50%;
+            left: 50%;
             transform-origin: center center;
             cursor: grab;
             user-select: none;
             -webkit-user-drag: none;
+        }
+
+        /* Circular Crop Guide Overlay */
+        .circle-guide {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            border-radius: 50%;
+            box-shadow: 0 0 0 200px rgba(0, 0, 0, 0.75);
+            border: 2px dashed var(--accent-color);
+            pointer-events: none;
+            z-index: 10;
         }
 
         .btn-download {
@@ -179,7 +195,7 @@
     <main class="container">
         <div class="upload-zone" id="upload-zone" onclick="document.getElementById('file-input').click()">
             <p>📷 <strong>Tap to select a photo</strong></p>
-            <p style="font-size: 0.8rem; color: var(--text-muted); margin-top: 4px;">Target: 57mm Badge (300 DPI)</p>
+            <p style="font-size: 0.8rem; color: var(--text-muted); margin-top: 4px;">Target: 57mm Round Badge (300 DPI)</p>
             <input type="file" id="file-input" accept="image/*" style="display: none;">
         </div>
 
@@ -187,6 +203,7 @@
 
         <div class="crop-viewport" id="viewport">
             <img id="image-to-crop" style="display: none;">
+            <div class="circle-guide"></div>
         </div>
 
         <button class="btn-download" id="btn-download" disabled>
@@ -235,8 +252,8 @@
                         const scaleW = vpWidth / img.naturalWidth;
                         const scaleH = vpHeight / img.naturalHeight;
                         scale = Math.max(scaleW, scaleH);
-                        posX = (vpWidth - img.naturalWidth * scale) / 2;
-                        posY = (vpHeight - img.naturalHeight * scale) / 2;
+                        posX = 0;
+                        posY = 0;
                         updateTransform();
                     };
                 };
@@ -245,7 +262,19 @@
         });
 
         function updateTransform() {
-            img.style.transform = `translate(${posX}px, ${posY}px) scale(${scale})`;
+            const vpWidth = viewport.clientWidth;
+            const vpHeight = viewport.clientHeight;
+            
+            const displayW = img.naturalWidth * scale;
+            const displayH = img.naturalHeight * scale;
+
+            const maxOffsetX = Math.max(0, (displayW - vpWidth) / 2);
+            const maxOffsetY = Math.max(0, (displayH - vpHeight) / 2);
+
+            posX = Math.max(-maxOffsetX, Math.min(maxOffsetX, posX));
+            posY = Math.max(-maxOffsetY, Math.min(maxOffsetY, posY));
+
+            img.style.transform = `translate(calc(-50% + ${posX}px), calc(-50% + ${posY}px)) scale(${scale})`;
         }
 
         // Pointer Events for Mouse & Touch Pan/Zoom
@@ -302,30 +331,54 @@
             } else {
                 scale *= (1 - zoomSpeed);
             }
+            const vpWidth = viewport.clientWidth;
+            const vpHeight = viewport.clientHeight;
+            const minScale = Math.max(vpWidth / img.naturalWidth, vpHeight / img.naturalHeight);
+            if (scale < minScale) scale = minScale;
+
             updateTransform();
         }, { passive: false });
 
-        // Generate 300 DPI 57mm Image Output (673x673 px)
+        // Generate 300 DPI 57mm Round Image Output (673x673 px with Clean White Outer Area)
         btnDownload.addEventListener('click', () => {
             if (!img.src) return;
             
             const targetSize = 673; // 57mm at 300 DPI
-            const vpSize = viewport.clientWidth;
-            const ratio = targetSize / vpSize;
+            const vpWidth = viewport.clientWidth;
+            const vpHeight = viewport.clientHeight;
+            const ratio = targetSize / vpWidth;
+            const center = targetSize / 2;
+            const radius = targetSize / 2;
 
+            ctx.save();
             ctx.clearRect(0, 0, targetSize, targetSize);
-            ctx.fillStyle = "#000000";
+
+            // 1. Fill entire square canvas with solid white background
+            ctx.fillStyle = "#ffffff";
             ctx.fillRect(0, 0, targetSize, targetSize);
 
-            const drawX = posX * ratio;
-            const drawY = posY * ratio;
-            const drawW = img.naturalWidth * scale * ratio;
-            const drawH = img.naturalHeight * scale * ratio;
+            // 2. Define circular clipping mask
+            ctx.beginPath();
+            ctx.arc(center, center, radius, 0, Math.PI * 2);
+            ctx.closePath();
+            ctx.clip();
+
+            // 3. Draw image cleanly with zero shadow or stroke overlay
+            const imgDisplayW = img.naturalWidth * scale;
+            const imgDisplayH = img.naturalHeight * scale;
+            const imgLeft = (vpWidth / 2) + posX - (imgDisplayW / 2);
+            const imgTop = (vpHeight / 2) + posY - (imgDisplayH / 2);
+
+            const drawX = imgLeft * ratio;
+            const drawY = imgTop * ratio;
+            const drawW = imgDisplayW * ratio;
+            const drawH = imgDisplayH * ratio;
 
             ctx.drawImage(img, drawX, drawY, drawW, drawH);
+            ctx.restore();
 
             const link = document.createElement('a');
-            link.download = `C4S-Badge-57mm-${Date.now()}.png`;
+            link.download = `C4S-Round-Badge-57mm-${Date.now()}.png`;
             link.href = canvas.toDataURL('image/png', 1.0);
             link.click();
         });
