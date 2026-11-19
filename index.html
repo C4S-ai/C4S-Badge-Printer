@@ -3,25 +3,10 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
-    <meta name="mobile-web-app-capable" content="yes">
-    <meta name="apple-mobile-web-app-capable" content="yes">
-    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="color-scheme" content="light">
     <title>C4S Badge Printer</title>
-    <link rel="manifest" href="manifest.json">
-    <link rel="icon" type="image/png" href="Logo.png">
     
     <style>
-        :root {
-            --bg-color: #000000;
-            --card-bg: #000000;
-            --accent-color: #00e676;
-            --accent-hover: #00c853;
-            --text-color: #ffffff;
-            --text-muted: #a0a0a0;
-            --border-muted: #555555;
-            --brand-red: #ff3333;
-        }
-
         * {
             box-sizing: border-box;
             margin: 0;
@@ -31,8 +16,8 @@
         }
 
         body {
-            background-color: var(--bg-color);
-            color: var(--text-color);
+            background-color: #ffffff !important;
+            color: #1a1a1a !important;
             min-height: 100vh;
             display: flex;
             flex-direction: column;
@@ -43,19 +28,23 @@
 
         header {
             text-align: center;
-            margin-bottom: 10px;
+            margin-bottom: 15px;
+            width: 100%;
+            max-width: 800px;
         }
 
         .brand-logo-only {
-            max-width: 1500px;
+            width: 100%;
+            max-width: 800px;
             height: auto;
             display: block;
-            margin: 0 auto 5px auto;
+            margin: 0 auto;
+            border-radius: 12px;
         }
 
         .container {
             width: 100%;
-            max-width: 1500px;
+            max-width: 800px;
             display: flex;
             flex-direction: column;
             align-items: center;
@@ -64,42 +53,45 @@
 
         .upload-zone {
             width: 100%;
-            border: 2px dashed var(--border-muted);
-            border-radius: 12px;
-            padding: 12px;
+            border: 2px dashed #94a3b8;
+            border-radius: 14px;
+            padding: 16px;
             text-align: center;
             cursor: pointer;
-            background-color: var(--card-bg);
-            transition: border-color 0.2s;
+            background-color: #f8fafc !important;
+            color: #1a1a1a !important;
+            box-shadow: 0 2px 6px rgba(0, 0, 0, 0.04);
         }
 
         .upload-zone:hover {
-            border-color: var(--accent-color);
+            border-color: #00c853;
+            background-color: #f1f5f9 !important;
         }
 
         .crop-viewport {
             width: 280px;
             height: 280px;
-            border: 2px solid var(--border-muted);
-            border-radius: 12px;
+            border: 2px solid #94a3b8;
+            border-radius: 14px;
             position: relative;
             overflow: hidden;
-            background-color: #ffffff;
+            background-color: #ffffff !important;
             touch-action: none;
             display: flex;
             justify-content: center;
             align-items: center;
+            box-shadow: 0 4px 16px rgba(0, 0, 0, 0.08);
         }
 
         .crop-viewport.active {
-            border-color: var(--accent-color);
+            border-color: #00c853;
         }
 
         #image-to-crop {
             position: absolute;
-            top: 50%;
-            left: 50%;
-            transform-origin: center center;
+            top: 0;
+            left: 0;
+            transform-origin: 0 0;
             cursor: grab;
             user-select: none;
             -webkit-user-drag: none;
@@ -113,8 +105,8 @@
             width: 100%;
             height: 100%;
             border-radius: 50%;
-            box-shadow: 0 0 0 200px rgba(0, 0, 0, 0.75);
-            border: 2px dashed var(--accent-color);
+            box-shadow: 0 0 0 200px rgba(255, 255, 255, 0.92);
+            border: 2px dashed #00c853;
             pointer-events: none;
             z-index: 10;
         }
@@ -122,14 +114,14 @@
         .btn-download {
             width: 100%;
             padding: 14px;
-            background-color: var(--accent-color);
-            color: #000000;
+            background-color: #00c853 !important;
+            color: #ffffff !important;
             font-weight: 700;
             font-size: 1rem;
             border: none;
-            border-radius: 8px;
+            border-radius: 10px;
             cursor: pointer;
-            transition: opacity 0.2s, background-color 0.2s;
+            box-shadow: 0 4px 12px rgba(0, 200, 83, 0.25);
             display: flex;
             justify-content: center;
             align-items: center;
@@ -137,29 +129,26 @@
         }
 
         .btn-download:disabled {
-            opacity: 0.3;
+            opacity: 0.4;
             cursor: not-allowed;
-            background-color: #333333;
-            color: #888888;
-        }
-
-        .btn-download:not(:disabled):hover {
-            background-color: var(--accent-hover);
+            background-color: #cbd5e1 !important;
+            color: #64748b !important;
+            box-shadow: none;
         }
 
         footer {
             margin-top: 20px;
             text-align: center;
             font-size: 0.8rem;
-            color: var(--text-muted);
+            color: #64748b !important;
             display: flex;
             flex-direction: column;
             align-items: center;
-            gap: 8px;
+            gap: 6px;
         }
 
         footer span.brand-text {
-            color: var(--brand-red);
+            color: #ef4444 !important;
             font-weight: 600;
         }
 
@@ -167,18 +156,13 @@
             display: inline-flex;
             align-items: center;
             gap: 6px;
-            color: var(--text-muted);
+            color: #64748b !important;
             text-decoration: none;
             font-size: 0.8rem;
-            padding: 6px 12px;
-            border: 1px solid #333;
+            padding: 6px 14px;
+            border: 1px solid #94a3b8;
             border-radius: 20px;
-            background-color: rgba(255, 255, 255, 0.05);
-        }
-
-        .help-link:hover {
-            border-color: var(--accent-color);
-            color: var(--text-color);
+            background-color: #f8fafc !important;
         }
 
         canvas {
@@ -195,11 +179,11 @@
     <main class="container">
         <div class="upload-zone" id="upload-zone" onclick="document.getElementById('file-input').click()">
             <p>📷 <strong>Tap to select a photo</strong></p>
-            <p style="font-size: 0.8rem; color: var(--text-muted); margin-top: 4px;">Target: 57mm Round Badge (300 DPI)</p>
+            <p style="font-size: 0.8rem; color: #64748b; margin-top: 4px;">Target: 57mm Round Badge (300 DPI)</p>
             <input type="file" id="file-input" accept="image/*" style="display: none;">
         </div>
 
-        <p style="font-size: 0.75rem; color: var(--text-muted);">Drag photo to move • Pinch to zoom</p>
+        <p style="font-size: 0.75rem; color: #64748b;">Drag photo to move • Pinch to zoom</p>
 
         <div class="crop-viewport" id="viewport">
             <img id="image-to-crop" style="display: none;">
@@ -230,11 +214,13 @@
         const ctx = canvas.getContext('2d');
 
         let scale = 1;
+        let defaultFitScale = 1;
         let posX = 0;
         let posY = 0;
         let isDragging = false;
-        let startX, startY;
-        let initialDistance = 0;
+        let startX = 0, startY = 0;
+        let initialPinchDist = null;
+        let startScale = 1;
 
         fileInput.addEventListener('change', (e) => {
             const file = e.target.files[0];
@@ -251,9 +237,12 @@
                         const vpHeight = viewport.clientHeight;
                         const scaleW = vpWidth / img.naturalWidth;
                         const scaleH = vpHeight / img.naturalHeight;
-                        scale = Math.max(scaleW, scaleH);
-                        posX = 0;
-                        posY = 0;
+                        
+                        defaultFitScale = Math.min(scaleW, scaleH);
+                        scale = defaultFitScale;
+                        
+                        posX = (vpWidth - img.naturalWidth * scale) / 2;
+                        posY = (vpHeight - img.naturalHeight * scale) / 2;
                         updateTransform();
                     };
                 };
@@ -264,88 +253,111 @@
         function updateTransform() {
             const vpWidth = viewport.clientWidth;
             const vpHeight = viewport.clientHeight;
+
+            if (scale < defaultFitScale) {
+                scale = defaultFitScale;
+            }
             
             const displayW = img.naturalWidth * scale;
             const displayH = img.naturalHeight * scale;
 
-            const maxOffsetX = Math.max(0, (displayW - vpWidth) / 2);
-            const maxOffsetY = Math.max(0, (displayH - vpHeight) / 2);
+            if (displayW <= vpWidth) {
+                posX = (vpWidth - displayW) / 2;
+            } else {
+                posX = Math.max(vpWidth - displayW, Math.min(0, posX));
+            }
 
-            posX = Math.max(-maxOffsetX, Math.min(maxOffsetX, posX));
-            posY = Math.max(-maxOffsetY, Math.min(maxOffsetY, posY));
+            if (displayH <= vpHeight) {
+                posY = (vpHeight - displayH) / 2;
+            } else {
+                posY = Math.max(vpHeight - displayH, Math.min(0, posY));
+            }
 
-            img.style.transform = `translate(calc(-50% + ${posX}px), calc(-50% + ${posY}px)) scale(${scale})`;
+            img.style.transform = `translate(${posX}px, ${posY}px) scale(${scale})`;
         }
 
-        // Pointer Events for Mouse & Touch Pan/Zoom
-        viewport.addEventListener('pointerdown', (e) => {
+        // --- Touch Gestures ---
+        viewport.addEventListener('touchstart', (e) => {
             if (!img.src) return;
+            if (e.touches.length === 2) {
+                isDragging = false;
+                initialPinchDist = Math.hypot(
+                    e.touches[0].clientX - e.touches[1].clientX,
+                    e.touches[0].clientY - e.touches[1].clientY
+                );
+                startScale = scale;
+            } else if (e.touches.length === 1) {
+                isDragging = true;
+                startX = e.touches[0].clientX - posX;
+                startY = e.touches[0].clientY - posY;
+            }
+        }, { passive: true });
+
+        viewport.addEventListener('touchmove', (e) => {
+            if (!img.src) return;
+            if (e.touches.length === 2 && initialPinchDist) {
+                const currentDist = Math.hypot(
+                    e.touches[0].clientX - e.touches[1].clientX,
+                    e.touches[0].clientY - e.touches[1].clientY
+                );
+                let newScale = startScale * (currentDist / initialPinchDist);
+                if (newScale < defaultFitScale) newScale = defaultFitScale;
+                scale = newScale;
+                updateTransform();
+            } else if (e.touches.length === 1 && isDragging) {
+                posX = e.touches[0].clientX - startX;
+                posY = e.touches[0].clientY - startY;
+                updateTransform();
+            }
+        }, { passive: true });
+
+        viewport.addEventListener('touchend', (e) => {
+            if (e.touches.length < 2) initialPinchDist = null;
+            if (e.touches.length === 0) isDragging = false;
+        });
+
+        // --- Mouse Panning ---
+        viewport.addEventListener('pointerdown', (e) => {
+            if (!img.src || e.pointerType === 'touch') return;
             isDragging = true;
             startX = e.clientX - posX;
             startY = e.clientY - posY;
-            viewport.setPointerCapture(e.pointerId);
+            try { viewport.setPointerCapture(e.pointerId); } catch(err) {}
         });
 
         viewport.addEventListener('pointermove', (e) => {
-            if (!isDragging) return;
+            if (!isDragging || e.pointerType === 'touch') return;
             posX = e.clientX - startX;
             posY = e.clientY - startY;
             updateTransform();
         });
 
         viewport.addEventListener('pointerup', (e) => {
+            if (e.pointerType === 'touch') return;
             isDragging = false;
             try { viewport.releasePointerCapture(e.pointerId); } catch(err) {}
         });
 
-        // Touch Pinch-to-Zoom
-        viewport.addEventListener('touchstart', (e) => {
-            if (e.touches.length === 2) {
-                initialDistance = Math.hypot(
-                    e.touches[0].clientX - e.touches[1].clientX,
-                    e.touches[0].clientY - e.touches[1].clientY
-                );
-            }
-        });
-
-        viewport.addEventListener('touchmove', (e) => {
-            if (e.touches.length === 2 && initialDistance > 0) {
-                const newDistance = Math.hypot(
-                    e.touches[0].clientX - e.touches[1].clientX,
-                    e.touches[0].clientY - e.touches[1].clientY
-                );
-                const zoomFactor = newDistance / initialDistance;
-                scale *= zoomFactor;
-                initialDistance = newDistance;
-                updateTransform();
-            }
-        });
-
-        // Mouse Wheel Zoom
+        // --- Mouse Wheel Zoom ---
         viewport.addEventListener('wheel', (e) => {
             if (!img.src) return;
             e.preventDefault();
-            const zoomSpeed = 0.05;
+            const zoomSpeed = 0.1;
             if (e.deltaY < 0) {
                 scale *= (1 + zoomSpeed);
             } else {
                 scale *= (1 - zoomSpeed);
             }
-            const vpWidth = viewport.clientWidth;
-            const vpHeight = viewport.clientHeight;
-            const minScale = Math.max(vpWidth / img.naturalWidth, vpHeight / img.naturalHeight);
-            if (scale < minScale) scale = minScale;
-
+            if (scale < defaultFitScale) scale = defaultFitScale;
             updateTransform();
         }, { passive: false });
 
-        // Generate 300 DPI 57mm Round Image Output (673x673 px with Clean White Outer Area)
+        // --- Generate Output ---
         btnDownload.addEventListener('click', () => {
             if (!img.src) return;
             
-            const targetSize = 673; // 57mm at 300 DPI
+            const targetSize = 673;
             const vpWidth = viewport.clientWidth;
-            const vpHeight = viewport.clientHeight;
             const ratio = targetSize / vpWidth;
             const center = targetSize / 2;
             const radius = targetSize / 2;
@@ -353,29 +365,27 @@
             ctx.save();
             ctx.clearRect(0, 0, targetSize, targetSize);
 
-            // 1. Fill entire square canvas with solid white background
             ctx.fillStyle = "#ffffff";
             ctx.fillRect(0, 0, targetSize, targetSize);
 
-            // 2. Define circular clipping mask
             ctx.beginPath();
             ctx.arc(center, center, radius, 0, Math.PI * 2);
             ctx.closePath();
             ctx.clip();
 
-            // 3. Draw image cleanly with zero shadow or stroke overlay
-            const imgDisplayW = img.naturalWidth * scale;
-            const imgDisplayH = img.naturalHeight * scale;
-            const imgLeft = (vpWidth / 2) + posX - (imgDisplayW / 2);
-            const imgTop = (vpHeight / 2) + posY - (imgDisplayH / 2);
-
-            const drawX = imgLeft * ratio;
-            const drawY = imgTop * ratio;
-            const drawW = imgDisplayW * ratio;
-            const drawH = imgDisplayH * ratio;
+            const drawX = posX * ratio;
+            const drawY = posY * ratio;
+            const drawW = img.naturalWidth * scale * ratio;
+            const drawH = img.naturalHeight * scale * ratio;
 
             ctx.drawImage(img, drawX, drawY, drawW, drawH);
             ctx.restore();
+
+            ctx.beginPath();
+            ctx.arc(center, center, radius - 1, 0, Math.PI * 2);
+            ctx.strokeStyle = "#ffffff";
+            ctx.lineWidth = 4;
+            ctx.stroke();
 
             const link = document.createElement('a');
             link.download = `C4S-Round-Badge-57mm-${Date.now()}.png`;
@@ -385,3 +395,4 @@
     </script>
 </body>
 </html>
+5
